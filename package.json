@@ -12,7 +12,7 @@
   "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "(coffee --compile --output dist --watch bin &);node ./dist/server.js"
+    "start": "coffee bin/server.coffee -n"
   },
   "repository": {
     "type": "git",

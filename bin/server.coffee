@@ -5,3 +5,7 @@
 ###
 
 "use strict"
+
+zouti = require "zouti"
+zouti.clearConsole
+zouti.log "Launching...", "cosmos:api", zouti.YELLOW
