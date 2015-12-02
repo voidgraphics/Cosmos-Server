@@ -10,7 +10,7 @@ class TasksController
     constructor: () ->
         zouti.log "Tasks Controller initiating", "cosmos:api:TasksController", "GREEN"
 
-    save: ( oTask ) ->
-        console.log "Saving:", oTask
+    save: ( oTaskData ) ->
+        console.log "Saving:", oTaskData
 
 module.exports = TasksController

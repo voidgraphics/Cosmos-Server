@@ -16,7 +16,7 @@ class Routes
     init: ( socket ) ->
         @socket = socket
 
-        @define "task.save", ( oTask ) => @TasksController.save( oTask )
+        @define "task.save", ( oTaskData ) => @TasksController.save( oTaskData )
 
 
 module.exports = Routes
