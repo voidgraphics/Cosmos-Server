@@ -7,7 +7,7 @@
 "use strict"
 
 zouti = require "zouti"
-zouti.clearConsole
+zouti.clearConsole()
 zouti.log "Launching...", "cosmos:api", zouti.YELLOW
 
 require "./core/sequelize.coffee"
