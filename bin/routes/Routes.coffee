@@ -9,7 +9,6 @@ TasksController = require "../controllers/TasksController.coffee"
 class Routes
     constructor: () ->
         @TasksController = new TasksController
-        @TasksController.init()
 
     init: ->
         @define "task.save", ( oTask ) => @TasksController.test( oTask )
