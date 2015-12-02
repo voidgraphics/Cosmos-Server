@@ -9,4 +9,6 @@
 zouti = require "zouti"
 zouti.clearConsole
 zouti.log "Launching...", "cosmos:api", zouti.YELLOW
+
+require "./core/sequelize.coffee"
 require "./core/express.coffee"
