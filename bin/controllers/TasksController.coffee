@@ -8,7 +8,7 @@ zouti = require "zouti"
 
 class TasksController
     constructor: () ->
-        zouti.log "Tasks Controller initiating", "cosmos:api:TasksController", "GREEN"
+        zouti.log "Tasks Controller initiating", "TasksController", "GREEN"
 
     save: ( oTaskData ) ->
         console.log "Saving:", oTaskData

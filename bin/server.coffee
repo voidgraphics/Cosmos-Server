@@ -8,7 +8,7 @@
 
 zouti = require "zouti"
 zouti.clearConsole()
-zouti.log "Starting server...", "cosmos:api", "GREEN"
+zouti.log "Starting server...", "bin/server.coffee", "GREEN"
 
 require "./core/sequelize.coffee"
 require "./core/express.coffee"

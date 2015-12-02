@@ -16,7 +16,7 @@ Routes = new ( require "../routes/Routes.coffee" )
 
 # Init socket.io
 io.on "connection", ( socket ) =>
-    zouti.log "A user connected", "cosmos:api", "GREEN"
+    zouti.log "A user connected", "bin/core/express.coffee", "GREEN"
 
     Routes.init( socket )
 
