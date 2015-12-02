@@ -7,8 +7,8 @@
 "use strict"
 
 oApp = require( "express" )()
-server = require( "http" ).Server oApp
-io = require( "socket.io" ) server
+server = require( "http" ).Server( oApp )
+io = require( "socket.io" )( server )
 zouti = require "zouti"
 
 # Configure routes
