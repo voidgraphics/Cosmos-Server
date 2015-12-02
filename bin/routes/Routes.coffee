@@ -10,11 +10,11 @@ class Routes
     constructor: () ->
         @TasksController = new TasksController
 
-    define: ( sEvent, callback ) ->
-        @socket.on sEvent, callback
+    define: ( sEvent, fCallback ) ->
+        @socket.on sEvent, fCallback
 
-    init: ( socket ) ->
-        @socket = socket
+    init: ( oSocket ) ->
+        @socket = oSocket
 
         @define "task.save", ( oTaskData ) => @TasksController.save( oTaskData )
 

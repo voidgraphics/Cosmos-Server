@@ -15,10 +15,9 @@ zouti = require "zouti"
 Routes = new ( require "../routes/Routes.coffee" )
 
 # Init socket.io
-io.on "connection", ( socket ) =>
+io.on "connection", ( oSocket ) =>
     zouti.log "A user connected", "bin/core/express.coffee", "GREEN"
-
-    Routes.init( socket )
+    Routes.init( oSocket )
 
 # Listen
 server.listen 12345
