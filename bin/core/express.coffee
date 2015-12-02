@@ -1,5 +1,5 @@
 ###
-    Cosmos
+    Cosmos-Server
     /bin/core/express.coffee ## Express setup
     Started Dec. 2, 2015
 ###
