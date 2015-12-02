@@ -1,6 +1,6 @@
 ###
     Cosmos-Server
-    /bin/server.js ## Entry point
+    /bin/server.coffee ## Entry point
     Started Dec. 2, 2015
 ###
 
