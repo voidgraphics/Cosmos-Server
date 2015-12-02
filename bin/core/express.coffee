@@ -18,8 +18,7 @@ Routes = new ( require "../routes/Routes.coffee" )
 io.on "connection", ( socket ) =>
     zouti.log "A user connected", "cosmos:api", "GREEN"
 
-    Routes.socket = socket
-    Routes.init()
+    Routes.init( socket )
 
 # Listen
 server.listen 12345

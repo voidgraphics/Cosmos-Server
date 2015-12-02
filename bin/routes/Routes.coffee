@@ -10,10 +10,13 @@ class Routes
     constructor: () ->
         @TasksController = new TasksController
 
-    init: ->
-        @define "task.save", ( oTask ) => @TasksController.test( oTask )
-
     define: ( sEvent, callback ) ->
         @socket.on sEvent, callback
+
+    init: ( socket ) ->
+        @socket = socket
+
+        @define "task.save", ( oTask ) => @TasksController.save( oTask )
+
 
 module.exports = Routes
