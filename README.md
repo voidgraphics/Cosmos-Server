@@ -1,2 +1,2 @@
 # Cosmos-Server
-API for Cosmos
+Server side for Cosmos
