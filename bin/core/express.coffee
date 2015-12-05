@@ -6,18 +6,17 @@
 
 "use strict"
 
-oApp = require( "express" )()
-server = require( "http" ).Server( oApp )
+express = require( "express" )()
+server = require( "http" ).Server( express )
 io = require( "socket.io" )( server )
 zouti = require "zouti"
-
-# Configure routes
-Routes = new ( require "../routes/Routes.coffee" )
+App = new ( require "../core/App.coffee" )
 
 # Init socket.io
 io.on "connection", ( oSocket ) =>
     zouti.log "A user connected", "bin/core/express.coffee", "GREEN"
-    Routes.init( oSocket )
+    
+    App.init( oSocket )
 
 # Listen
 server.listen 12345
