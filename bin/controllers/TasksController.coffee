@@ -13,9 +13,9 @@ class TasksController
     get: ( iTaskID ) ->
         console.log "Returning task:", iTaskID
 
-    getAll: () ->
+    getAll: ( callback ) ->
         console.log "Returning all tasks"
-        @items
+        callback( @items )
 
     save: ( oTaskData ) ->
         console.log "Saving:", oTaskData
