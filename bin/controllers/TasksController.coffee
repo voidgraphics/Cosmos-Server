@@ -14,11 +14,9 @@ class TasksController
         console.log "Returning task:", iTaskID
 
     getAll: ( callback ) ->
-        console.log "Returning all tasks"
         callback( @items )
 
     save: ( oTaskData ) ->
-        console.log "Saving:", oTaskData
 
     delete: ( iTaskID ) ->
         zouti.log "Deleting task #{ iTaskID }", "TasksController", "RED"
