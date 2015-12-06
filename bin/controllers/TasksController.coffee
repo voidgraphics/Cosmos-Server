@@ -49,7 +49,7 @@ class TasksController
             deadline: "2016-01-18"
             users: [ "user3", "user4" ]
             state: "finished"
-        3:
+        4:
             title: "Something else finished"
             deadline: "2016-01-18"
             users: [ "user3", "user4" ]
