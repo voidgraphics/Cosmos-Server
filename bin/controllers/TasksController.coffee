@@ -17,6 +17,8 @@ class TasksController
         callback( @items )
 
     save: ( oTaskData ) ->
+        iTaskID = Object.keys( @items ).length + 1
+        @items[iTaskID] = oTaskData
 
     delete: ( iTaskID ) ->
         zouti.log "Deleting task #{ iTaskID }", "TasksController", "RED"
