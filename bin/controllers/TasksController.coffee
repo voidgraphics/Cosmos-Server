@@ -25,6 +25,7 @@ class TasksController
 
     delete: ( iTaskID ) ->
         zouti.log "Deleting task #{ iTaskID }", "TasksController", "RED"
+        delete @items[ iTaskID ]
 
     # For testing
     items:
