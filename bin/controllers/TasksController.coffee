@@ -20,6 +20,9 @@ class TasksController
         iTaskID = Object.keys( @items ).length + 1
         @items[iTaskID] = oTaskData
 
+    update: ( iTaskID, oTaskData ) ->
+        @items[ iTaskID ] = oTaskData
+
     delete: ( iTaskID ) ->
         zouti.log "Deleting task #{ iTaskID }", "TasksController", "RED"
 
