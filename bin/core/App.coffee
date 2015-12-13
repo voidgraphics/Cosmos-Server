@@ -16,12 +16,12 @@ class App
 
     init: ( oSocket ) ->
         @socket = oSocket
-
+        zouti.bench "Loading routes"
         @route "task.getAll", ( callback ) => @TasksController.getAll( callback )
         @route "task.get", ( iTaskID ) => @TasksController.get( iTaskID )
         @route "task.save", ( oTaskData ) => @TasksController.save( oTaskData )
         @route "task.update", ( iTaskID, oTaskData ) => @TasksController.update( iTaskID, oTaskData )
         @route "task.delete", ( iTaskID ) => @TasksController.delete( iTaskID )
-
+        zouti.bench "Loading routes"
 
 module.exports = App
