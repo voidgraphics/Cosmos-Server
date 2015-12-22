@@ -17,43 +17,61 @@ class TasksController
         callback( @items )
 
     save: ( oTaskData ) ->
-        iTaskID = Object.keys( @items ).length + 1
-        @items[iTaskID] = oTaskData
+        iTaskID = oTaskData.id
+        zouti.log "Adding task #{ oTaskData.title }", "TasksController", "BLUE"
+        @items[ iTaskID ] = oTaskData
+
+    saveAll: ( aTasks ) ->
+        @items = aTasks
 
     update: ( iTaskID, oTaskData ) ->
         @items[ iTaskID ] = oTaskData
 
+    changeState: ( iTaskID, sNewState ) ->
+        @items[ iTaskID ].state = sNewState
+        console.log @items[ iTaskID ]
+
     delete: ( iTaskID ) ->
         zouti.log "Deleting task #{ iTaskID }", "TasksController", "RED"
-        delete @items[ iTaskID ]
+        delete @items[iTaskID]
 
     # For testing
-    items:
-        0:
-            title: "Something to do"
-            deadline: "2016-01-16"
-            users: [ "user1", "user2" ]
-            state: "todo"
-        1:
-            title: "Something else to do"
-            deadline: "2016-01-18"
-            users: [ "user3", "user4" ]
-            state: "todo"
-        2:
-            title: "Something in progress"
-            deadline: "2015-12-03"
-            users: [ "user1" ]
-            state: "inprogress"
-        3:
-            title: "Something finished"
-            deadline: "2016-01-18"
-            users: [ "user3", "user4" ]
-            state: "finished"
-        4:
-            title: "Something else finished"
-            deadline: "2016-01-18"
-            users: [ "user3", "user4" ]
-            state: "finished"
+    items: {}
+        # 0:
+        #     id: 0
+        #     title: "Something to do"
+        #     deadline: "2016-01-16"
+        #     users: [ "user1", "user2" ]
+        #     state: "todo"
+        #     position: 1
+        # 1:
+        #     id: 1
+        #     title: "Something else to do"
+        #     deadline: "2016-01-18"
+        #     users: [ "user3", "user4" ]
+        #     state: "todo"
+        #     position: 0
+        # 2:
+        #     id: 2
+        #     title: "Something in progress"
+        #     deadline: "2015-12-03"
+        #     users: [ "user1" ]
+        #     state: "inprogress"
+        #     position: 0
+        # 3:
+        #     id: 3
+        #     title: "Something finished"
+        #     deadline: "2016-01-18"
+        #     users: [ "user3", "user4" ]
+        #     state: "finished"
+        #     position: 1
+        # 4:
+        #     id: 4
+        #     title: "Something else finished"
+        #     deadline: "2016-01-18"
+        #     users: [ "user3", "user4" ]
+        #     state: "finished"
+        #     position: 0
 
 
 module.exports = TasksController

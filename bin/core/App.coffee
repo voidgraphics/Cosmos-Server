@@ -20,6 +20,8 @@ class App
         @route "task.getAll", ( callback ) => @TasksController.getAll( callback )
         @route "task.get", ( iTaskID ) => @TasksController.get( iTaskID )
         @route "task.save", ( oTaskData ) => @TasksController.save( oTaskData )
+        @route "task.saveAll", ( aTasks ) => @TasksController.saveAll( aTasks )
+        @route "task.changeState", ( iTaskID, sNewState ) => @TasksController.changeState( iTaskID, sNewState )
         @route "task.update", ( iTaskID, oTaskData ) => @TasksController.update( iTaskID, oTaskData )
         @route "task.delete", ( iTaskID ) => @TasksController.delete( iTaskID )
         zouti.bench "Loading routes"
