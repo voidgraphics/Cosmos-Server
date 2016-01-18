@@ -22,6 +22,7 @@ class App
         @socket = oSocket
         zouti.bench "Loading routes"
         @route "task.getAll", ( callback ) => @TasksController.getAll( callback )
+        @route "task.getRecent", ( callback ) => @TasksController.getRecent( callback )
         @route "task.get", ( iTaskID ) => @TasksController.get( iTaskID )
         @route "task.save", ( oTaskData ) => @TasksController.save( oTaskData )
         @route "task.saveAll", ( aTasks ) => @TasksController.saveAll( aTasks )
