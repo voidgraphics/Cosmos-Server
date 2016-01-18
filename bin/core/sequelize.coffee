@@ -11,3 +11,6 @@ exports.db = oSequelize = new Sequelize "cosmos", "root", "root", {
     host: "localhost",
     dialect: "mysql"
 }
+
+exports.models = oModels =
+    Task: oSequelize.import "../models/task.coffee"
