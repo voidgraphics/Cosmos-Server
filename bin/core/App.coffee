@@ -4,11 +4,15 @@
     Started Dec. 2, 2015
 ###
 zouti = require "zouti"
+
 TasksController = require "../controllers/TasksController.coffee"
 
 class App
     constructor: () ->
-        zouti.log "Instanciating App, creating controllers", "core/App.coffee", "BLUE"
+        zouti.log "Instanciating App", "core/App.coffee", "BLUE"
+        zouti.log "Creating models", "core/App.coffee", "BLUE"
+        Sequelize = require "./sequelize.coffee"
+        zouti.log "Creating controllers", "core/App.coffee", "BLUE"
         @TasksController = new TasksController
 
     route: ( sEvent, fCallback ) ->

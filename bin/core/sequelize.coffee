@@ -5,3 +5,9 @@
 ###
 
 "use strict"
+
+Sequelize = require "sequelize"
+exports.db = oSequelize = new Sequelize "cosmos", "root", "root", {
+    host: "localhost",
+    dialect: "mysql"
+}
