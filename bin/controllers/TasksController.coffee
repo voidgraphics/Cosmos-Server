@@ -5,6 +5,8 @@
 ###
 
 zouti = require "zouti"
+Task = require ( "../core/sequelize.coffee" )
+Task = Task.models.Task
 
 class TasksController
     constructor: () ->
