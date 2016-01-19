@@ -14,3 +14,4 @@ exports.db = oSequelize = new Sequelize "cosmos", "root", "root", {
 
 exports.models = oModels =
     Task: oSequelize.import "../models/task.coffee"
+    Mockup: oSequelize.import "../models/mockup.coffee"
