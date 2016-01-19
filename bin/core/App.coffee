@@ -6,6 +6,7 @@
 zouti = require "zouti"
 
 TasksController = require "../controllers/TasksController.coffee"
+MockupsController = require "../controllers/MockupsController.coffee"
 
 class App
     constructor: () ->
@@ -14,6 +15,7 @@ class App
         Sequelize = require "./sequelize.coffee"
         zouti.log "Creating controllers", "core/App.coffee", "BLUE"
         @TasksController = new TasksController
+        @MockupsController = new MockupsController
 
     route: ( sEvent, fCallback ) ->
         @socket.on sEvent, fCallback
@@ -21,14 +23,18 @@ class App
     init: ( oSocket ) ->
         @socket = oSocket
         zouti.bench "Loading routes"
+
+        # Task routes
         @route "task.getAll", ( callback ) => @TasksController.getAll( callback )
         @route "task.getRecent", ( callback ) => @TasksController.getRecent( callback )
-        @route "task.get", ( iTaskID ) => @TasksController.get( iTaskID )
         @route "task.save", ( oTaskData ) => @TasksController.save( oTaskData )
         @route "task.saveAll", ( aTasks ) => @TasksController.saveAll( aTasks )
-        @route "task.changeState", ( iTaskID, sNewState ) => @TasksController.changeState( iTaskID, sNewState )
         @route "task.update", ( iTaskID, oTaskData ) => @TasksController.update( iTaskID, oTaskData )
         @route "task.delete", ( iTaskID ) => @TasksController.delete( iTaskID )
+
+        # Mockup routes
+        @route "mockup.getAll", ( callback ) => @MockupsController.getAll( callback )
+
         zouti.bench "Loading routes"
 
 module.exports = App
