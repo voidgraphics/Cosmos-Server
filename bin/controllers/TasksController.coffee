@@ -5,8 +5,8 @@
 ###
 
 zouti = require "zouti"
-Task = require ( "../core/sequelize.coffee" )
-Task = Task.models.Task
+Sequelize = require ( "../core/sequelize.coffee" )
+Task = Sequelize.models.Task
 
 class TasksController
     constructor: () ->
@@ -89,7 +89,6 @@ class TasksController
                 }
             } )
             .catch( ( oError ) -> zouti.error oError, "TasksController.delete" )
-        delete @items[ sTaskID ]
 
     # For testing
     # items:
