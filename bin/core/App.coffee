@@ -7,6 +7,7 @@ zouti = require "zouti"
 
 TasksController = require "../controllers/TasksController.coffee"
 MockupsController = require "../controllers/MockupsController.coffee"
+ChatController = require "../controllers/ChatController.coffee"
 
 class App
     constructor: () ->
@@ -16,6 +17,7 @@ class App
         zouti.log "Creating controllers", "core/App.coffee", "BLUE"
         @TasksController = new TasksController
         @MockupsController = new MockupsController
+        @ChatController = new ChatController
 
     route: ( sEvent, fCallback ) ->
         @socket.on sEvent, fCallback
@@ -34,6 +36,9 @@ class App
 
         # Mockup routes
         @route "mockup.getAll", ( callback ) => @MockupsController.getAll( callback )
+
+        # Chat routes
+        @route "chat.getAll", ( callback ) => @ChatController.getAll( callback )
 
         zouti.bench "Loading routes"
 

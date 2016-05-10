@@ -24,7 +24,7 @@ module.exports = ( oSequelize, DataTypes ) ->
             field: "position"
 
     oProperties =
-        tablename: "tasks",
+        tableName: "tasks",
         paranoid: true
 
     return oSequelize.define "tasks", oColumns, oProperties
