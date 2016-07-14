@@ -10,14 +10,14 @@ MockupsController = require "../controllers/MockupsController.coffee"
 ChatController = require "../controllers/ChatController.coffee"
 
 class App
-    constructor: () ->
+    constructor: ( io ) ->
         zouti.log "Instanciating App", "core/App.coffee", "BLUE"
         zouti.log "Creating models", "core/App.coffee", "BLUE"
         Sequelize = require "./sequelize.coffee"
         zouti.log "Creating controllers", "core/App.coffee", "BLUE"
         @TasksController = new TasksController
         @MockupsController = new MockupsController
-        @ChatController = new ChatController
+        @ChatController = new ChatController( io )
 
     route: ( sEvent, fCallback ) ->
         @socket.on sEvent, fCallback
@@ -39,6 +39,7 @@ class App
 
         # Chat routes
         @route "chat.getAll", ( callback ) => @ChatController.getAll( callback )
+        @route "chat.newMessage", ( message ) => @ChatController.newMessage( message )
 
         zouti.bench "Loading routes"
 

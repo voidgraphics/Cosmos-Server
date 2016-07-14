@@ -21,3 +21,4 @@ exports.models = oModels =
 
 # Relations
 oModels.Chat.belongsTo( oModels.User, { foreignKey: 'user_id' } )
+oModels.User.hasMany( oModels.Chat, { foreignKey: 'user_id' } )

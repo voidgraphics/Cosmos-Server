@@ -10,12 +10,12 @@ express = require( "express" )()
 server = require( "http" ).Server( express )
 io = require( "socket.io" )( server )
 zouti = require "zouti"
-App = new ( require "../core/App.coffee" )
+App = new ( require "../core/App.coffee" )( io )
 
 # Init socket.io
 io.on "connection", ( oSocket ) =>
     zouti.log "A user connected", "bin/core/express.coffee", "GREEN"
-    
+
     App.init( oSocket )
 
 # Listen
