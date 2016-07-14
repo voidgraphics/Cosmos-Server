@@ -90,43 +90,5 @@ class TasksController
             } )
             .catch( ( oError ) -> zouti.error oError, "TasksController.delete" )
 
-    # For testing
-    # items:
-        # 'ec96a3ac-9d0a-4e10-9be3-a35aa9377212':
-        #     id: 'ec96a3ac-9d0a-4e10-9be3-a35aa9377212'
-        #     title: "Something to do"
-        #     deadline: "2016-01-16"
-        #     users: [ "user1", "user2" ]
-        #     state: "todo"
-        #     position: 1
-        # 'c8b9e3f8-1590-4ecd-9ee5-4dbfd16e9edc':
-        #     id: 'c8b9e3f8-1590-4ecd-9ee5-4dbfd16e9edc'
-        #     title: "Something else to do"
-        #     deadline: "2016-01-18"
-        #     users: [ "user3", "user4" ]
-        #     state: "todo"
-        #     position: 0
-        # '9111e89b-02c2-40b5-859e-838d6ff0bf58':
-        #     id: '9111e89b-02c2-40b5-859e-838d6ff0bf58'
-        #     title: "Something in progress"
-        #     deadline: "2015-12-03"
-        #     users: [ "user1" ]
-        #     state: "inprogress"
-        #     position: 0
-        # 'e2e7d06c-da03-428c-9a16-1975cbc3dd5f':
-        #     id: 'e2e7d06c-da03-428c-9a16-1975cbc3dd5f'
-        #     title: "Something finished"
-        #     deadline: "2016-01-18"
-        #     users: [ "user3", "user4" ]
-        #     state: "finished"
-        #     position: 1
-        # '67d1c4d5-cfa7-4ce0-84f7-cc628922fe71':
-        #     id: '67d1c4d5-cfa7-4ce0-84f7-cc628922fe71'
-        #     title: "Something else finished"
-        #     deadline: "2016-01-18"
-        #     users: [ "user3", "user4" ]
-        #     state: "finished"
-        #     position: 0
-
 
 module.exports = TasksController
