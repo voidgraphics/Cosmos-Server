@@ -35,7 +35,7 @@ class App
         @route "task.delete", ( iTaskID ) => @TasksController.delete( iTaskID )
 
         # Mockup routes
-        @route "mockup.getAll", ( callback ) => @MockupsController.getAll( callback )
+        @route "mockup.getAll", ( ) => @MockupsController.getAll( @socket )
 
         # Chat routes
         @route "chat.getAll", ( callback ) => @ChatController.getAll( callback )
