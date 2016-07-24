@@ -7,21 +7,32 @@
 module.exports = ( oSequelize, DataTypes ) ->
     oColumns =
         uuid:
-            type: DataTypes.UUID,
-            field: "id",
+            type: DataTypes.UUID
+            field: "id"
+            allowNull: false
             unique: true
         username:
-            type: DataTypes.STRING,
+            type: DataTypes.STRING
             field: "username"
+            allowNull: false
+            unique: true
         firstname:
-            type: DataTypes.STRING,
+            type: DataTypes.STRING
             field: "firstname"
         lastname:
-            type: DataTypes.STRING,
+            type: DataTypes.STRING
             field: "lastname"
+        password:
+            type: DataTypes.STRING
+            allowNull: false
+            field: "password"
+        avatar:
+            type: DataTypes.STRING
+            field: "avatar"
 
     oProperties =
-        tableName: "users",
+        tableName: "users"
         paranoid: true
 
-    return oSequelize.define "users", oColumns, oProperties
+    UserModel = oSequelize.define "users", oColumns, oProperties
+    return UserModel

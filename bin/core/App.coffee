@@ -8,6 +8,7 @@ zouti = require "zouti"
 TasksController = require "../controllers/TasksController.coffee"
 MockupsController = require "../controllers/MockupsController.coffee"
 ChatController = require "../controllers/ChatController.coffee"
+UserController = require "../controllers/UserController.coffee"
 
 class App
     constructor: ( io ) ->
@@ -18,6 +19,7 @@ class App
         @TasksController = new TasksController
         @MockupsController = new MockupsController
         @ChatController = new ChatController( io )
+        @UserController = new UserController
 
     route: ( sEvent, fCallback ) ->
         @socket.on sEvent, fCallback
@@ -40,6 +42,11 @@ class App
         # Chat routes
         @route "chat.getAll", ( callback ) => @ChatController.getAll( callback )
         @route "chat.newMessage", ( message ) => @ChatController.newMessage( message )
+
+        # User routes
+        @route "user.login", ( oUserData ) => @UserController.login( oUserData, @socket )
+        @route "user.register", ( oUserData, callback ) => @UserController.register( oUserData, callback )
+        @route "user.getInfo", ( sUserId, callback ) => @UserController.getInfo( sUserId, callback )
 
         zouti.bench "Loading routes"
 
