@@ -15,20 +15,18 @@ class UserController
 
     register: ( oUserInfo, callback ) ->
         sUserId = zouti.uuid()
-        User.create {
+        User.create
             uuid: sUserId
             username: oUserInfo.username
             firstname: oUserInfo.firstname
             lastname: oUserInfo.lastname
             password: zouti.sha256 oUserInfo.password
-        }
-        .catch( ( oError ) ->
+        .catch ( oError ) ->
             oResult =
                 code: 500
                 error: oError.name
             return callback oResult
-        )
-        .then( ( oUserData ) ->
+        .then ( oUserData ) ->
             if oUserData
                 oResult =
                     code: 200
@@ -39,34 +37,30 @@ class UserController
                     message: "Error while creating the user"
 
             callback oResult
-        )
 
     login: ( oUserInfo, oSocket ) ->
         oUserInfo.password = zouti.sha256 oUserInfo.password
         User
-            .find(
+            .find
                 where:
                     username: oUserInfo.username
                     password: oUserInfo.password
                 attributes:
                     exclude: [ "password" ]
-            )
             .catch( ( oError ) -> zouti.error oError, "UserController.login" )
             .then( ( oData ) ->
                 if oData
                     oSocket.emit "user.logged", oData
                 else oSocket.emit "user.notlogged"
-            )
 
     getInfo: ( sUserId, callback ) ->
         User
-            .find( {
+            .find
                 where:
                     uuid: sUserId
                 attributes:
                     exclude: [ "password" ]
-            } )
-            .catch( ( oError ) -> zouti.error oError, "UserController.getInfo" )
-            .then( ( oData ) -> callback( oData ) )
+            .catch ( oError ) -> zouti.error oError, "UserController.getInfo"
+            .then ( oData ) -> callback( oData )
 
 module.exports = UserController
