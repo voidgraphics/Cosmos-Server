@@ -28,3 +28,8 @@ oSequelize.sync()
   , (err) ->
     console.log('An error occurred while creating the table:', err)
   )
+oSequelize
+    .sync()
+    .catch ( oError ) -> console.error oError
+    .then () ->
+        console.log 'Synced database'
