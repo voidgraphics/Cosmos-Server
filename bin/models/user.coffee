@@ -11,6 +11,7 @@ module.exports = ( oSequelize, DataTypes ) ->
             field: "id"
             allowNull: false
             unique: true
+            primaryKey: true
         username:
             type: DataTypes.STRING
             field: "username"
