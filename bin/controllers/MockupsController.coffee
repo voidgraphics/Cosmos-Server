@@ -15,7 +15,17 @@ class MockupsController
 
     getThumb: ( mockup, oSocket ) ->
         fs.readFile __dirname + "/../../public/mockups/thumbnail/#{ mockup.image }", ( err, buffer ) ->
-            if err then zouti.error err, "MockupsController.read"
+            if err
+                oSocket.emit "mockup.error", "Could not get thumbnail for #{mockup.title}"
+                return zouti.error err, "MockupsController.getThumb"
+            mockup.image = buffer.toString "base64"
+            oSocket.emit "mockup.sent", mockup
+
+    getImage: ( mockup, oSocket ) ->
+        fs.readFile __dirname + "/../../public/mockups/fullsize/#{ mockup.image }", ( err, buffer ) ->
+            if err
+                oSocket.emit "mockup.error", "Could not get image for #{mockup.title}"
+                return zouti.error err, "MockupsController.getImage"
             mockup.image = buffer.toString "base64"
             oSocket.emit "mockup.sent", mockup
 
@@ -27,6 +37,16 @@ class MockupsController
             .then ( oData ) ->
                 for mockup in oData
                     that.getThumb mockup, oSocket
+
+    get: ( sId, oSocket ) ->
+        Mockup
+            .find
+                where:
+                    id: sId
+            .catch( ( oError ) -> zouti.error oError, "UserController.login" )
+            .then( ( mockup ) =>
+                @getImage mockup, oSocket
+            )
 
     save: ( oMockupData ) ->
         zouti.log "Adding task #{ oMockupData.title }", "MockupsController", "BLUE"
