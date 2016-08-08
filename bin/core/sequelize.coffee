@@ -22,3 +22,9 @@ exports.models = oModels =
 # Relations
 oModels.Chat.belongsTo( oModels.User, { foreignKey: 'user_id' } )
 oModels.User.hasMany( oModels.Chat, { foreignKey: 'user_id' } )
+oSequelize.sync()
+  .then((err) ->
+    console.log('Synced database')
+  , (err) ->
+    console.log('An error occurred while creating the table:', err)
+  )
