@@ -5,6 +5,7 @@
 ###
 
 zouti = require "zouti"
+fs = require "fs"
 Sequelize = require ( "../core/sequelize.coffee" )
 User = Sequelize.models.User
 
@@ -12,6 +13,14 @@ class UserController
     constructor: ( io ) ->
         @io = io
         zouti.log "User Controller initiating", "UserController", "GREEN"
+
+    getAvatar: ( oData, oSocket ) ->
+        fs.readFile __dirname + "/../../public/avatars/#{ oData.avatar }", ( err, buffer ) ->
+            if err
+                oSocket.emit "login.error", "Could not get user's avatar"
+                return zouti.error err, "UserController.getAvatar"
+            oData.avatar = buffer.toString "base64"
+            oSocket.emit "user.logged", oData
 
     register: ( oUserInfo, callback ) ->
         sUserId = zouti.uuid()
@@ -50,7 +59,7 @@ class UserController
             .catch( ( oError ) -> zouti.error oError, "UserController.login" )
             .then( ( oData ) ->
                 if oData
-                    oSocket.emit "user.logged", oData
+                    @getAvatar oData, oSocket
                 else oSocket.emit "user.notlogged"
 
     getInfo: ( sUserId, callback ) ->
