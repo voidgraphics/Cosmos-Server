@@ -21,6 +21,7 @@ class App
         @ChatController = new ChatController( io )
         @UserController = new UserController
         @CommentsController = new CommentsController
+        console.log zouti.uuid()
 
     route: ( sEvent, fCallback ) ->
         @socket.on sEvent, fCallback
