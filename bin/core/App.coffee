@@ -9,6 +9,7 @@ TasksController = require "../controllers/TasksController.coffee"
 MockupsController = require "../controllers/MockupsController.coffee"
 ChatController = require "../controllers/ChatController.coffee"
 UserController = require "../controllers/UserController.coffee"
+CommentsController = require "../controllers/CommentsController.coffee"
 
 class App
     constructor: ( io ) ->
@@ -19,6 +20,7 @@ class App
         @MockupsController = new MockupsController
         @ChatController = new ChatController( io )
         @UserController = new UserController
+        @CommentsController = new CommentsController
 
     route: ( sEvent, fCallback ) ->
         @socket.on sEvent, fCallback
@@ -37,6 +39,9 @@ class App
 
         # Mockup routes
         @route "mockup.getAll", ( ) => @MockupsController.getAll( @socket )
+        # Comment routes
+        @route "comment.get", ( sMockupId, callback ) => @CommentsController.get( sMockupId, callback )
+        @route "comment.submit", ( oComment ) => @CommentsController.submit( oComment )
 
         # Chat routes
         @route "chat.getAll", ( callback ) => @ChatController.getAll( callback )
