@@ -39,6 +39,8 @@ class App
 
         # Mockup routes
         @route "mockup.getAll", ( ) => @MockupsController.getAll( @socket )
+        @route "mockup.get", ( sId ) => @MockupsController.get( sId, @socket )
+
         # Comment routes
         @route "comment.get", ( sMockupId, callback ) => @CommentsController.get( sMockupId, callback )
         @route "comment.submit", ( oComment ) => @CommentsController.submit( oComment )
