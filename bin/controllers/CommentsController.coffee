@@ -21,4 +21,17 @@ class CommentsController
             .catch ( oError ) -> zouti.error oError, "CommentsController.get"
             .then ( aComments ) -> callback aComments
 
+    submit: ( oComment ) ->
+        Comment
+            .create( {
+                uuid: zouti.uuid()
+                text: oComment.text
+                mockupId: oComment.mockup.id
+                authorId: oComment.author.id
+                x: oComment.x
+                y: oComment.y
+            } )
+            .catch( ( oError ) -> zouti.error oError, "CommentsController.submit" )
+            .then( ( oSavedComment ) -> zouti.log "Saved comment", oSavedComment, "GREEN" )
+
 module.exports = CommentsController
