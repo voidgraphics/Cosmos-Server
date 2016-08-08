@@ -14,7 +14,6 @@ class App
     constructor: ( io ) ->
         zouti.log "Instanciating App", "core/App.coffee", "BLUE"
         zouti.log "Creating models", "core/App.coffee", "BLUE"
-        Sequelize = require "./sequelize.coffee"
         zouti.log "Creating controllers", "core/App.coffee", "BLUE"
         @TasksController = new TasksController
         @MockupsController = new MockupsController
