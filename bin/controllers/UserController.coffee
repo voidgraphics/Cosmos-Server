@@ -56,8 +56,10 @@ class UserController
                     password: oUserInfo.password
                 attributes:
                     exclude: [ "password" ]
-            .catch( ( oError ) -> zouti.error oError, "UserController.login" )
-            .then( ( oData ) ->
+                include:
+                    model: Sequelize.models.Team
+            .catch ( oError ) -> zouti.error oError, "UserController.login"
+            .then ( oData ) =>
                 if oData
                     @getAvatar oData, oSocket
                 else oSocket.emit "user.notlogged"
