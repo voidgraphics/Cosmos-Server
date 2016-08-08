@@ -13,4 +13,12 @@ class CommentsController
     constructor: () ->
         zouti.log "Comments Controller initiating", "CommentsController", "GREEN"
 
+    get: ( sMockupId, callback ) ->
+        Comment
+            .findAll
+                where:
+                    mockupId: sMockupId
+            .catch ( oError ) -> zouti.error oError, "CommentsController.get"
+            .then ( aComments ) -> callback aComments
+
 module.exports = CommentsController
