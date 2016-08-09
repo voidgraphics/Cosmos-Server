@@ -31,6 +31,9 @@ Comment.belongsTo( Mockup, { foreignKey: 'mockup_id' } )
 User.belongsToMany( Team, { through: "users_teams" } )
 Team.belongsToMany( User, { through: "users_teams" } )
 Team.hasMany( Project )
+Project.hasMany( Chat )
+Project.hasMany( Task )
+Project.hasMany( Mockup )
 
 # Models
 oSequelize.models = oModels =
