@@ -17,6 +17,12 @@ module.exports = ( oSequelize, DataTypes ) ->
 
     oProperties =
         tablename: "teams",
-        paranoid: true
+        paranoid: true,
+        instanceMethods:
+            fetchProjects: ( callback ) ->
+                this.getProjects()
+                    .catch ( oError ) -> zouti.error oError, "UserController.login (team.getProjects)"
+                    .then ( aProjects ) =>
+                        callback this.name, aProjects
 
     return oSequelize.define "teams", oColumns, oProperties

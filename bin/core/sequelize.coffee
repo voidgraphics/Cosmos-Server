@@ -22,6 +22,7 @@ User =       oSequelize.import "../models/user.coffee"
 Chat =       oSequelize.import "../models/chat.coffee"
 Comment =    oSequelize.import "../models/comment.coffee"
 Team =       oSequelize.import "../models/team.coffee"
+Project =    oSequelize.import "../models/project.coffee"
 
 # Relations
 Chat.belongsTo( User, { foreignKey: 'user_id' } )
@@ -29,6 +30,7 @@ User.hasMany( Chat, { foreignKey: 'user_id' } )
 Comment.belongsTo( Mockup, { foreignKey: 'mockup_id' } )
 User.belongsToMany( Team, { through: "users_teams" } )
 Team.belongsToMany( User, { through: "users_teams" } )
+Team.hasMany( Project )
 
 # Models
 oSequelize.models = oModels =
@@ -38,6 +40,7 @@ oSequelize.models = oModels =
     Chat:       Chat
     Comment:    Comment
     Team:       Team
+    Project:    Project
 
 oSequelize
     .sync()
