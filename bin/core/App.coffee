@@ -10,6 +10,7 @@ MockupsController = require "../controllers/MockupsController.coffee"
 ChatController = require "../controllers/ChatController.coffee"
 UserController = require "../controllers/UserController.coffee"
 CommentsController = require "../controllers/CommentsController.coffee"
+ProjectsController = require "../controllers/ProjectsController.coffee"
 
 class App
     constructor: ( io ) ->
@@ -21,6 +22,7 @@ class App
         @ChatController = new ChatController( io )
         @UserController = new UserController
         @CommentsController = new CommentsController
+        @ProjectsController = new ProjectsController
         console.log zouti.uuid()
 
     route: ( sEvent, fCallback ) ->
@@ -41,6 +43,7 @@ class App
         # Mockup routes
         @route "mockup.getAll", ( sProjectId ) => @MockupsController.getAll( sProjectId, @socket )
         @route "mockup.get", ( sId ) => @MockupsController.get( sId, @socket )
+        @route "mockup.create", ( oMockup ) => @MockupsController.create( oMockup )
 
         # Comment routes
         @route "comment.get", ( sMockupId, callback ) => @CommentsController.get( sMockupId, callback )
@@ -54,6 +57,9 @@ class App
         @route "user.login", ( oUserData ) => @UserController.login( oUserData, @socket )
         @route "user.register", ( oUserData, callback ) => @UserController.register( oUserData, callback )
         @route "user.getInfo", ( sUserId, callback ) => @UserController.getInfo( sUserId, callback )
+
+        # Project routes
+        @route "project.create", ( oProjectData, callback ) => @ProjectsController.create( oProjectData, callback )
 
         zouti.bench "Loading routes"
 
