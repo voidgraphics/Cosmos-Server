@@ -29,14 +29,26 @@ class MockupsController
             mockup.image = buffer.toString "base64"
             oSocket.emit "mockup.sent", mockup
 
-    getAll: ( oSocket ) ->
+    getAll: ( sProjectId, oSocket ) ->
         that = this
         Mockup
-            .all()
+            .findAll
+                where:
+                    projectUuid: sProjectId
             .catch ( oError ) -> zouti.error oError, "MockupsController.getAll"
             .then ( oData ) ->
                 for mockup in oData
-                    that.getThumb mockup, oSocket
+                    that.countComments mockup, oSocket
+
+
+    countComments: ( mockup, oSocket ) ->
+        oSequelize.models.Comment.count
+            where:
+                mockupId: mockup.uuid
+        .catch ( e ) -> console.error e
+        .then ( count ) =>
+            mockup.commentCount = count
+            @getThumb mockup, oSocket
 
     get: ( sId, oSocket ) ->
         Mockup

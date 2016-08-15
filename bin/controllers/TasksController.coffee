@@ -12,9 +12,11 @@ class TasksController
     constructor: () ->
         zouti.log "Tasks Controller initiating", "TasksController", "GREEN"
 
-    getAll: ( callback ) ->
+    getAll: ( sProjectId, callback ) ->
         Task
-            .all()
+            .findAll
+                where:
+                    projectUuid: sProjectId
             .catch( ( oError ) -> zouti.error oError, "TasksController.getAll" )
             .then( ( oData ) -> callback( oData ) )
         # callback( @items )

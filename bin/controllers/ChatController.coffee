@@ -13,9 +13,12 @@ class ChatController
         @io = io
         zouti.log "Chat Controller initiating", "ChatController", "GREEN"
 
-    getAll: ( callback ) ->
+    getAll: ( sProjectId, callback ) ->
         Chat
-            .all( include: [{ model: Sequelize.models.User }] )
+            .findAll
+                  where:
+                        projectUuid: sProjectId
+                  include: [{ model: Sequelize.models.User }]
             .catch( ( oError ) -> zouti.error oError, "ChatController.getAll" )
             .then( ( oData ) -> callback( oData ) )
 
@@ -23,8 +26,9 @@ class ChatController
         that = this
         Chat.create( {
             id: zouti.uuid()
-            userId: message.userId,
+            userId: message.userId
             text: message.text
+            projectUuid: message.projectId
         }, {
             include: [{ model: Sequelize.models.User }]
         } )

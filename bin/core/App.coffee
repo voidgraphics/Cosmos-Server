@@ -31,7 +31,7 @@ class App
         zouti.bench "Loading routes"
 
         # Task routes
-        @route "task.getAll", ( callback ) => @TasksController.getAll( callback )
+        @route "task.getAll", ( sProjectId, callback ) => @TasksController.getAll( sProjectId, callback )
         @route "task.getRecent", ( callback ) => @TasksController.getRecent( callback )
         @route "task.save", ( oTaskData ) => @TasksController.save( oTaskData )
         @route "task.saveAll", ( aTasks ) => @TasksController.saveAll( aTasks )
@@ -39,7 +39,7 @@ class App
         @route "task.delete", ( iTaskID ) => @TasksController.delete( iTaskID )
 
         # Mockup routes
-        @route "mockup.getAll", ( ) => @MockupsController.getAll( @socket )
+        @route "mockup.getAll", ( sProjectId ) => @MockupsController.getAll( sProjectId, @socket )
         @route "mockup.get", ( sId ) => @MockupsController.get( sId, @socket )
 
         # Comment routes
@@ -47,7 +47,7 @@ class App
         @route "comment.submit", ( oComment ) => @CommentsController.submit( oComment )
 
         # Chat routes
-        @route "chat.getAll", ( callback ) => @ChatController.getAll( callback )
+        @route "chat.getAll", ( sProjectId, callback ) => @ChatController.getAll( sProjectId, callback )
         @route "chat.newMessage", ( message ) => @ChatController.newMessage( message )
 
         # User routes
