@@ -58,15 +58,15 @@ class UserController
                     exclude: [ "password" ]
                 include:
                     model: Sequelize.models.Team
+                    include: [ Sequelize.models.Project ]
             .catch ( oError ) -> zouti.error oError, "UserController.login"
             .then ( oData ) =>
                 if oData
-                    oData.projects = []
-                    for team in oData.teams
-                        team.fetchProjects ( sTeamName, aProjects ) ->
-                            oSocket.emit "user.receiveProjects", sTeamName, aProjects
                     @getAvatar oData, oSocket
                 else oSocket.emit "user.notlogged"
+
+    addProjects: ( projects, sTeamName, aProjects ) ->
+        return projects[ sTeamName ] = aProjects
 
     getInfo: ( sUserId, callback ) ->
         User
