@@ -10,6 +10,7 @@ module.exports = ( oSequelize, DataTypes ) ->
             type: DataTypes.UUID,
             field: "id",
             unique: true
+            primaryKey: true
         authorId:
             type: DataTypes.UUID,
             field: "author_id"
