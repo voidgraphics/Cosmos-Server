@@ -28,6 +28,7 @@ Project =    oSequelize.import "../models/project.coffee"
 Chat.belongsTo( User, { foreignKey: 'user_id' } )
 User.hasMany( Chat, { foreignKey: 'user_id' } )
 Comment.belongsTo( Mockup, { foreignKey: 'mockup_id' } )
+Mockup.hasMany( Comment )
 User.belongsToMany( Team, { through: "users_teams" } )
 Team.belongsToMany( User, { through: "users_teams" } )
 Team.hasMany( Project )
