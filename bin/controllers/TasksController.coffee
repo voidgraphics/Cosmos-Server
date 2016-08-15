@@ -61,6 +61,7 @@ class TasksController
                 deadline: oTaskData.deadline,
                 state: oTaskData.state,
                 position: oTaskData.position
+                projectUuid: oTaskData.projectId
             } )
             .catch( ( oError ) -> zouti.error oError, "TasksController.save" )
             .then( ( oSavedTask ) -> zouti.log "Saved task", oSavedTask, "GREEN" )
