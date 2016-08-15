@@ -6,8 +6,9 @@
 
 zouti = require "zouti"
 fs = require "fs"
-Mockup = require ( "../core/sequelize.coffee" )
-Mockup = Mockup.models.Mockup
+easyimg = require "easyimage"
+oSequelize = require ( "../core/sequelize.coffee" )
+Mockup = oSequelize.models.Mockup
 
 class MockupsController
     constructor: () ->
@@ -19,7 +20,7 @@ class MockupsController
                 oSocket.emit "mockup.error", "Could not get thumbnail for #{mockup.title}"
                 return zouti.error err, "MockupsController.getThumb"
             mockup.image = buffer.toString "base64"
-            oSocket.emit "mockup.sent", mockup
+            oSocket.emit "mockup.sent", mockup, mockup.commentCount
 
     getImage: ( mockup, oSocket ) ->
         fs.readFile __dirname + "/../../public/mockups/fullsize/#{ mockup.image }", ( err, buffer ) ->
@@ -60,18 +61,30 @@ class MockupsController
                 @getImage mockup, oSocket
             )
 
-    save: ( oMockupData ) ->
-        zouti.log "Adding task #{ oMockupData.title }", "MockupsController", "BLUE"
-        Task
-            .create( {
-                uuid: oMockupData.id,
-                title: oMockupData.title,
-                deadline: oMockupData.deadline,
-                state: oMockupData.state,
-                position: oMockupData.position
-            } )
-            .catch( ( oError ) -> zouti.error oError, "MockupsController.save" )
-            .then( ( oSavedMockup ) -> zouti.log "Saved mockup", oSavedMockup, "GREEN" )
+    create: ( oMockupData ) ->
+        zouti.log "Adding task #{ oMockupData.name }", "MockupsController", "BLUE"
+        matches = oMockupData.file.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/)
+
+        fs.writeFile "public/mockups/fullsize/#{oMockupData.image}", new Buffer(matches[2], "base64"), ( err ) ->
+            if err then zouti.error err, "MockupsController.create"
+            easyimg.thumbnail
+                src: "./public/mockups/fullsize/#{oMockupData.image}", dst: "./public/mockups/thumbnail/#{oMockupData.image}",
+                width:500, height:350,
+                x:0, y:0
+            .then(
+                ( image ) ->
+                    Mockup
+                        .create
+                            uuid: zouti.uuid()
+                            title: oMockupData.name
+                            image: oMockupData.image
+                            projectUuid: oMockupData.projectId
+                        .catch( ( oError ) -> zouti.error oError, "MockupsController.save" )
+                        .then( ( oSavedMockup ) -> zouti.log "Saved mockup", oSavedMockup, "GREEN" )
+                , ( err ) ->
+                    console.error err
+            )
+
 
     update: ( sMockupID, oMockupData ) ->
 
