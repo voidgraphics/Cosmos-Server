@@ -21,6 +21,15 @@ class ProjectsController
             .catch ( oError ) -> zouti.error oError, "ProjectsController.create"
             .then ( oSavedProject ) ->
                 zouti.log "Created project", oSavedProject, "GREEN"
-                callback oSavedProject
+
+                oSavedProject
+                    .createChatroom
+                        uuid: zouti.uuid()
+                        name: "General"
+                    .catch ( oError ) -> zouti.error oError, "ProjectsController.create (addChatroom)"
+                    .then ( oSavedChatroom ) ->
+                        zouti.log "Created General chatroom", oSavedChatroom, "GREEN"
+                        callback oSavedProject
+
 
 module.exports = ProjectsController

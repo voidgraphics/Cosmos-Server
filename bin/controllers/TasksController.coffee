@@ -17,9 +17,12 @@ class TasksController
             .findAll
                 where:
                     projectUuid: sProjectId
-            .catch( ( oError ) -> zouti.error oError, "TasksController.getAll" )
-            .then( ( oData ) -> callback( oData ) )
-        # callback( @items )
+                include:
+                    model: Sequelize.models.User
+                    attributes: [ 'id' ]
+            .catch ( oError ) -> zouti.error oError, "TasksController.getAll"
+            .then ( aTasks ) ->
+                callback( aTasks )
 
     getRecent: ( callback ) ->
         zouti.log "Getting recent tasks", "TasksController.getRecent", "GREEN"
@@ -55,16 +58,17 @@ class TasksController
     save: ( oTaskData ) ->
         zouti.log "Adding task #{ oTaskData.title }", "TasksController", "BLUE"
         Task
-            .create( {
-                uuid: oTaskData.id,
+            .create
+                uuid: oTaskData.uuid,
                 title: oTaskData.title,
                 deadline: oTaskData.deadline,
                 state: oTaskData.state,
                 position: oTaskData.position
                 projectUuid: oTaskData.projectId
-            } )
-            .catch( ( oError ) -> zouti.error oError, "TasksController.save" )
-            .then( ( oSavedTask ) -> zouti.log "Saved task", oSavedTask, "GREEN" )
+            .catch ( oError ) -> zouti.error oError, "TasksController.save"
+            .then ( oSavedTask ) ->
+                zouti.log "Saved task", oSavedTask, "GREEN"
+                oSavedTask.addUsers oTaskData.users
 
     saveAll: ( aTasks ) ->
         for task in aTasks
@@ -75,22 +79,41 @@ class TasksController
                 position: task.position
             }, {
                 where: {
-                    uuid: task.id
+                    uuid: task.uuid
                 }
             } )
         zouti.log "Saving tasks", "TasksController.saveAll", "GREEN"
 
-    update: ( iTaskID, oTaskData ) ->
-        @items[ iTaskID ] = oTaskData
+    update: ( oTask ) ->
+        Task
+            .update( {
+                title: oTask.title
+                deadline: oTask.deadline
+                state: oTask.state
+                position: oTask.position
+            },
+            where:
+                uuid: oTask.uuid
+            )
+            .catch ( oError ) -> zouti.error oError, "TasksController.update"
+            .then () ->
+                zouti.log "Updated task", "GREEN"
+                Task
+                    .find
+                        where:
+                            uuid: oTask.uuid
+                    .catch ( oError ) -> zouti.error oError, "TasksController.update"
+                    .then ( oResult ) ->
+                        oResult.setUsers oTask.users
+
 
     delete: ( sTaskID ) ->
         zouti.log "Deleting task #{ sTaskID }", "TasksController", "RED"
         Task
-            .destroy( {
-                where: {
+            .destroy
+                where:
                     uuid: sTaskID
-                }
-            } )
+
             .catch( ( oError ) -> zouti.error oError, "TasksController.delete" )
 
 

@@ -49,6 +49,7 @@ class MockupsController
         .catch ( e ) -> console.error e
         .then ( count ) =>
             mockup.commentCount = count
+            console.log mockup
             @getThumb mockup, oSocket
 
     get: ( sId, oSocket ) ->
@@ -61,7 +62,7 @@ class MockupsController
                 @getImage mockup, oSocket
             )
 
-    create: ( oMockupData ) ->
+    create: ( oMockupData, oSocket ) ->
         zouti.log "Adding task #{ oMockupData.name }", "MockupsController", "BLUE"
         matches = oMockupData.file.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/)
 
@@ -72,7 +73,7 @@ class MockupsController
                 width:500, height:350,
                 x:0, y:0
             .then(
-                ( image ) ->
+                ( image ) =>
                     Mockup
                         .create
                             uuid: zouti.uuid()
@@ -80,7 +81,9 @@ class MockupsController
                             image: oMockupData.image
                             projectUuid: oMockupData.projectId
                         .catch( ( oError ) -> zouti.error oError, "MockupsController.save" )
-                        .then( ( oSavedMockup ) -> zouti.log "Saved mockup", oSavedMockup, "GREEN" )
+                        .then( ( oSavedMockup ) =>
+                            @countComments oSavedMockup, oSocket
+                        )
                 , ( err ) ->
                     console.error err
             )

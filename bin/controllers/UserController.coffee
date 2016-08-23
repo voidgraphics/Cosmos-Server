@@ -8,6 +8,7 @@ zouti = require "zouti"
 fs = require "fs"
 Sequelize = require ( "../core/sequelize.coffee" )
 User = Sequelize.models.User
+Team = Sequelize.models.Team
 
 class UserController
     constructor: ( io ) ->
@@ -23,6 +24,14 @@ class UserController
             oSocket.emit "user.logged", oData
 
     register: ( oUserInfo, callback ) ->
+
+        matches = oUserInfo.file.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/)
+
+        fs.writeFile "public/avatars/#{oUserInfo.avatar}", new Buffer(matches[2], "base64"), ( err ) ->
+            if err then zouti.error err, "UserController.register (avatar)"
+            else console.log "file written"
+
+
         sUserId = zouti.uuid()
         User.create
             uuid: sUserId
@@ -30,6 +39,7 @@ class UserController
             firstname: oUserInfo.firstname
             lastname: oUserInfo.lastname
             password: zouti.sha256 oUserInfo.password
+            avatar: oUserInfo.avatar
         .catch ( oError ) ->
             oResult =
                 code: 500
@@ -65,6 +75,10 @@ class UserController
                     @getAvatar oData, oSocket
                 else oSocket.emit "user.notlogged"
 
+    join: ( sProjectId, sTeamId, oSocket ) ->
+        oSocket.join sProjectId
+        oSocket.join sTeamId
+
     addProjects: ( projects, sTeamName, aProjects ) ->
         return projects[ sTeamName ] = aProjects
 
@@ -77,5 +91,31 @@ class UserController
                     exclude: [ "password" ]
             .catch ( oError ) -> zouti.error oError, "UserController.getInfo"
             .then ( oData ) -> callback( oData )
+
+    getTeams: ( sUserId, oSocket, callback ) ->
+        User
+            .find
+                where:
+                    id: sUserId
+            .catch ( oError ) -> zouti.error oError, "UserController.getTeams"
+            .then ( oUser ) ->
+                oUser
+                    .getTeams()
+                    .catch ( oError ) -> zouti.error oError, "UserController.getTeams"
+                    .then ( aTeams ) ->
+                        for team in aTeams
+                            team
+                                .getRequests()
+                                .catch ( oError ) -> zouti.error oError, "UserController.getTeams"
+                                .then ( aRequests ) ->
+                                    for request in aRequests
+                                        User
+                                            .find
+                                                where:
+                                                    uuid: request.userUuid
+                                            .catch ( oError ) -> zouti.error oError, "UserController.getTeams"
+                                            .then ( oUser ) ->
+                                                oSocket.emit "team.receiveRequests", request.teamUuid, oUser
+                        callback aTeams
 
 module.exports = UserController
