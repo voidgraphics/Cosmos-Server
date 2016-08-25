@@ -18,6 +18,7 @@ class CommentsController
             .findAll
                 where:
                     mockupId: sMockupId
+                # include: Sequelize.models.User
             .catch ( oError ) -> zouti.error oError, "CommentsController.get"
             .then ( aComments ) -> callback aComments
 

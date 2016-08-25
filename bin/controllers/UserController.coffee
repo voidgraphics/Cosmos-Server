@@ -6,6 +6,7 @@
 
 zouti = require "zouti"
 fs = require "fs"
+easyimg = require "easyimage"
 Sequelize = require ( "../core/sequelize.coffee" )
 User = Sequelize.models.User
 Team = Sequelize.models.Team
@@ -23,39 +24,54 @@ class UserController
             oData.avatar = buffer.toString "base64"
             oSocket.emit "user.logged", oData
 
-    register: ( oUserInfo, callback ) ->
+    register: ( oUserInfo, oSocket, callback ) ->
 
         matches = oUserInfo.file.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/)
-
-        fs.writeFile "public/avatars/#{oUserInfo.avatar}", new Buffer(matches[2], "base64"), ( err ) ->
-            if err then zouti.error err, "UserController.register (avatar)"
-            else console.log "file written"
-
-
         sUserId = zouti.uuid()
-        User.create
-            uuid: sUserId
-            username: oUserInfo.username
-            firstname: oUserInfo.firstname
-            lastname: oUserInfo.lastname
-            password: zouti.sha256 oUserInfo.password
-            avatar: oUserInfo.avatar
-        .catch ( oError ) ->
-            oResult =
-                code: 500
-                error: oError.name
-            return callback oResult
-        .then ( oUserData ) ->
-            if oUserData
-                oResult =
-                    code: 200
-                    message: "User #{oUserData.username} successfully created"
-            else
-                oResult =
-                    code: 500
-                    message: "Error while creating the user"
 
-            callback oResult
+        fs.writeFile "public/avatars/#{sUserId}", new Buffer(matches[2], "base64"), ( err ) =>
+            if err then zouti.error err, "UserController.register (avatar)"
+            easyimg.thumbnail(
+                src: "./public/avatars/#{sUserId}", dst: "./public/avatars/#{sUserId}.png",
+                width:200, height:200,
+                x:0, y:0
+            )
+            .then(
+                User.create
+                    uuid: sUserId
+                    username: oUserInfo.username
+                    firstname: oUserInfo.firstname
+                    lastname: oUserInfo.lastname
+                    password: zouti.sha256 oUserInfo.password
+                    avatar: sUserId + '.png'
+                .catch ( oError ) ->
+                    oResult =
+                        code: 500
+                        error: oError.name
+                    return callback oResult
+                .then ( oUserData ) =>
+                    if oUserData
+                        oResult =
+                            code: 200
+                            message: "User #{oUserData.username} successfully created"
+                            user: oUserData
+                        data = {
+                            username: oUserInfo.username
+                            password: oUserInfo.password
+                        }
+                        setTimeout( () =>
+                            @login data, oSocket
+                        , 1000 )
+                    else
+                        oResult =
+                            code: 500
+                            message: "Error while creating the user"
+
+                    callback oResult
+            )
+
+
+
 
     login: ( oUserInfo, oSocket ) ->
         oUserInfo.password = zouti.sha256 oUserInfo.password

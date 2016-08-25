@@ -18,7 +18,7 @@ class App
         zouti.log "Instanciating App", "core/App.coffee", "BLUE"
         zouti.log "Creating controllers", "core/App.coffee", "BLUE"
         @TasksController = new TasksController
-        @MockupsController = new MockupsController
+        @MockupsController = new MockupsController( io )
         @ChatController = new ChatController( io )
         @UserController = new UserController
         @CommentsController = new CommentsController
@@ -44,7 +44,7 @@ class App
         # Mockup routes
         @route "mockup.getAll", ( sProjectId ) => @MockupsController.getAll( sProjectId, @socket )
         @route "mockup.get", ( sId ) => @MockupsController.get( sId, @socket )
-        @route "mockup.create", ( oMockup ) => @MockupsController.create( oMockup, @socket )
+        @route "mockup.create", ( oMockup, callback ) => @MockupsController.create( oMockup, @socket )
 
         # Comment routes
         @route "comment.get", ( sMockupId, callback ) => @CommentsController.get( sMockupId, callback )
@@ -58,14 +58,14 @@ class App
 
         # User routes
         @route "user.login", ( oUserData ) => @UserController.login( oUserData, @socket )
-        @route "user.register", ( oUserData, callback ) => @UserController.register( oUserData, callback )
+        @route "user.register", ( oUserData, callback ) => @UserController.register( oUserData, @socket, callback )
         @route "user.getInfo", ( sUserId, callback ) => @UserController.getInfo( sUserId, callback )
         @route "user.getTeams", ( sUserId, callback ) => @UserController.getTeams( sUserId, @socket, callback )
         @route "user.join", ( sProjectId, sTeamId ) => @UserController.join( sProjectId, sTeamId, @socket )
 
         # Team routes
         @route "team.create", ( sTeamName, sUserId ) => @TeamsController.create( sTeamName, sUserId, @socket )
-        @route "team.createAndProject", ( oTeam, oProject ) => @TeamsController.createAndProject( oTeam, sUserId, @socket )
+        @route "team.createAndProject", ( oTeam, oProject ) => @TeamsController.createAndProject( oTeam, oProject, @socket )
         @route "team.accept", ( sTeamId, sUserId ) => @TeamsController.accept( sTeamId, sUserId )
         @route "team.find", ( sTeamName, sUserId, callback ) => @TeamsController.find( sTeamName, sUserId, callback )
         @route "team.leave", ( sTeamId, sUserId ) => @TeamsController.leave( sTeamId, sUserId, @socket )

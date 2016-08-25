@@ -17,7 +17,6 @@ class TeamsController
         zouti.log "Teams Controller initiating", "TeamsController", "GREEN"
 
     getUsers: ( sTeamId, oSocket ) ->
-        console.log sTeamId
         Team
             .find
                 where:

@@ -11,7 +11,8 @@ oSequelize = require ( "../core/sequelize.coffee" )
 Mockup = oSequelize.models.Mockup
 
 class MockupsController
-    constructor: () ->
+    constructor: ( io ) ->
+        @io = io
         zouti.log "Mockups Controller initiating", "MockupsController", "GREEN"
 
     getThumb: ( mockup, oSocket ) ->
@@ -41,7 +42,6 @@ class MockupsController
                 for mockup in oData
                     that.countComments mockup, oSocket
 
-
     countComments: ( mockup, oSocket ) ->
         oSequelize.models.Comment.count
             where:
@@ -49,7 +49,6 @@ class MockupsController
         .catch ( e ) -> console.error e
         .then ( count ) =>
             mockup.commentCount = count
-            console.log mockup
             @getThumb mockup, oSocket
 
     get: ( sId, oSocket ) ->
@@ -57,37 +56,43 @@ class MockupsController
             .find
                 where:
                     id: sId
-            .catch( ( oError ) -> zouti.error oError, "UserController.login" )
-            .then( ( mockup ) =>
+            .catch ( oError ) -> zouti.error oError, "UserController.login"
+            .then ( mockup ) =>
                 @getImage mockup, oSocket
-            )
 
     create: ( oMockupData, oSocket ) ->
-        zouti.log "Adding task #{ oMockupData.name }", "MockupsController", "BLUE"
+        zouti.log "Adding mockup #{ oMockupData.name }", "MockupsController", "BLUE"
         matches = oMockupData.file.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/)
 
-        fs.writeFile "public/mockups/fullsize/#{oMockupData.image}", new Buffer(matches[2], "base64"), ( err ) ->
+        uuid = zouti.uuid()
+
+        fs.writeFile "public/mockups/fullsize/#{oMockupData.image}", new Buffer(matches[2], "base64"), ( err ) =>
             if err then zouti.error err, "MockupsController.create"
+            easyimg.convert
+                src: "./public/mockups/fullsize/#{oMockupData.image}", dst: "./public/mockups/fullsize/#{uuid}.png"
             easyimg.thumbnail
-                src: "./public/mockups/fullsize/#{oMockupData.image}", dst: "./public/mockups/thumbnail/#{oMockupData.image}",
+                src: "./public/mockups/fullsize/#{oMockupData.image}", dst: "./public/mockups/thumbnail/#{uuid}.png",
                 width:500, height:350,
                 x:0, y:0
             .then(
                 ( image ) =>
                     Mockup
                         .create
-                            uuid: zouti.uuid()
+                            uuid: uuid
                             title: oMockupData.name
-                            image: oMockupData.image
+                            image: uuid + '.png'
                             projectUuid: oMockupData.projectId
-                        .catch( ( oError ) -> zouti.error oError, "MockupsController.save" )
-                        .then( ( oSavedMockup ) =>
+                        .catch ( oError ) -> zouti.error oError, "MockupsController.save"
+                        .then ( oSavedMockup ) =>
                             @countComments oSavedMockup, oSocket
-                        )
                 , ( err ) ->
                     console.error err
-            )
 
+                setTimeout( () =>
+                    fs.unlink "./public/mockups/fullsize/#{oMockupData.image}", (err) =>
+                        if err then console.error err
+                , 5000 )
+            )
 
     update: ( sMockupID, oMockupData ) ->
 

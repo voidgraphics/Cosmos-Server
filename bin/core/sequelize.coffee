@@ -29,6 +29,7 @@ Request =    oSequelize.import "../models/request.coffee"
 # Relations
 Chat.belongsTo( User, { foreignKey: 'user_id' } )
 User.hasMany( Chat, { foreignKey: 'user_id' } )
+# Comment.belongsTo( User, { foreignKey: 'author_id' } )
 Comment.belongsTo( Mockup, { foreignKey: 'mockup_id' } )
 Mockup.hasMany( Comment )
 User.belongsToMany( Team, { through: "users_teams" } )
@@ -57,7 +58,7 @@ oSequelize.models = oModels =
     Request:    Request
 
 oSequelize
-    .sync()
+    .sync({ force: true })
     .catch ( oError ) -> console.error oError
     .then () ->
         console.log 'Synced database'
