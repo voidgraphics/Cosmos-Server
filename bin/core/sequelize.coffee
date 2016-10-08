@@ -58,7 +58,7 @@ oSequelize.models = oModels =
     Request:    Request
 
 oSequelize
-    .sync({ force: true })
+    .sync({ force: false })
     .catch ( oError ) -> console.error oError
     .then () ->
         console.log 'Synced database'
