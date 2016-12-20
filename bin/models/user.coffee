@@ -30,6 +30,9 @@ module.exports = ( oSequelize, DataTypes ) ->
         avatar:
             type: DataTypes.STRING
             field: "avatar"
+        settings:
+            type: DataTypes.TEXT
+            field: "settings"
 
     oProperties =
         tableName: "users"

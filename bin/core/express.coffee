@@ -15,7 +15,7 @@ zouti = require "zouti"
 io.on "connection", ( oSocket ) =>
     zouti.log "A user connected", "bin/core/express.coffee", "GREEN"
 
-    App = new ( require "../core/App.coffee" )( io )
+    global.App = new ( require "../core/App.coffee" )( io )
     App.init( oSocket )
 
 # Listen

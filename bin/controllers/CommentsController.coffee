@@ -10,19 +10,22 @@ Sequelize = require ( "../core/sequelize.coffee" )
 Comment = Sequelize.models.Comment
 
 class CommentsController
-    constructor: () ->
-        zouti.log "Comments Controller initiating", "CommentsController", "GREEN"
-
     get: ( sMockupId, callback ) ->
         Comment
             .findAll
                 where:
                     mockupId: sMockupId
-                # include: Sequelize.models.User
+                include: Sequelize.models.User
             .catch ( oError ) -> zouti.error oError, "CommentsController.get"
-            .then ( aComments ) -> callback aComments
+            .then ( aComments ) =>
+                for comment in aComments
+                    @getUserAvatar comment.user.avatar
+                callback aComments
 
-    submit: ( oComment ) ->
+    getUserAvatar: ( sPath ) ->
+        console.log sPath
+
+    submit: ( oComment, socket ) ->
         Comment
             .create( {
                 uuid: zouti.uuid()
@@ -32,7 +35,9 @@ class CommentsController
                 x: oComment.x
                 y: oComment.y
             } )
-            .catch( ( oError ) -> zouti.error oError, "CommentsController.submit" )
+            .catch ( oError ) ->
+                socket.emit "error.new", "There was an error while saving your comment."
+                zouti.error oError, "CommentsController.submit"
             .then( ( oSavedComment ) -> zouti.log "Saved comment", oSavedComment, "GREEN" )
 
 module.exports = CommentsController

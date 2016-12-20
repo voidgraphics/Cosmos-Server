@@ -13,12 +13,11 @@ Mockup = oSequelize.models.Mockup
 class MockupsController
     constructor: ( io ) ->
         @io = io
-        zouti.log "Mockups Controller initiating", "MockupsController", "GREEN"
 
     getThumb: ( mockup, oSocket ) ->
         fs.readFile __dirname + "/../../public/mockups/thumbnail/#{ mockup.image }", ( err, buffer ) ->
             if err
-                oSocket.emit "mockup.error", "Could not get thumbnail for #{mockup.title}"
+                oSocket.emit "error.new", "Could not get thumbnail for #{mockup.title}"
                 return zouti.error err, "MockupsController.getThumb"
             mockup.image = buffer.toString "base64"
             oSocket.emit "mockup.sent", mockup, mockup.commentCount
@@ -26,7 +25,7 @@ class MockupsController
     getImage: ( mockup, oSocket ) ->
         fs.readFile __dirname + "/../../public/mockups/fullsize/#{ mockup.image }", ( err, buffer ) ->
             if err
-                oSocket.emit "mockup.error", "Could not get image for #{mockup.title}"
+                oSocket.emit "error.new", "Could not get image for #{mockup.title}"
                 return zouti.error err, "MockupsController.getImage"
             mockup.image = buffer.toString "base64"
             oSocket.emit "mockup.sent", mockup
@@ -37,7 +36,9 @@ class MockupsController
             .findAll
                 where:
                     projectUuid: sProjectId
-            .catch ( oError ) -> zouti.error oError, "MockupsController.getAll"
+            .catch ( oError ) ->
+                oSocket.emit "error.new", "There was an error while getting the mockups."
+                zouti.error oError, "MockupsController.getAll"
             .then ( oData ) ->
                 for mockup in oData
                     that.countComments mockup, oSocket
@@ -46,7 +47,9 @@ class MockupsController
         oSequelize.models.Comment.count
             where:
                 mockupId: mockup.uuid
-        .catch ( e ) -> console.error e
+        .catch ( e ) ->
+            oSocket.emit "error.new", "There was an error while counting comments on #{mockup.title}."
+            console.error e
         .then ( count ) =>
             mockup.commentCount = count
             @getThumb mockup, oSocket
@@ -56,7 +59,9 @@ class MockupsController
             .find
                 where:
                     id: sId
-            .catch ( oError ) -> zouti.error oError, "UserController.login"
+            .catch ( oError ) ->
+                oSocket.emit "error.new", "We could not get this item."
+                zouti.error oError, "UserController.login"
             .then ( mockup ) =>
                 @getImage mockup, oSocket
 
@@ -67,7 +72,9 @@ class MockupsController
         uuid = zouti.uuid()
 
         fs.writeFile "public/mockups/fullsize/#{oMockupData.image}", new Buffer(matches[2], "base64"), ( err ) =>
-            if err then zouti.error err, "MockupsController.create"
+            if err
+                oSocket.emit "error.new", "There was a problem while uploading the image to the server."
+                zouti.error err, "MockupsController.create"
             easyimg.convert
                 src: "./public/mockups/fullsize/#{oMockupData.image}", dst: "./public/mockups/fullsize/#{uuid}.png"
             easyimg.thumbnail
@@ -82,7 +89,9 @@ class MockupsController
                             title: oMockupData.name
                             image: uuid + '.png'
                             projectUuid: oMockupData.projectId
-                        .catch ( oError ) -> zouti.error oError, "MockupsController.save"
+                        .catch ( oError ) ->
+                            oSocket.emit "error.new", "We could not save your mockup to the server. Please try again later."
+                            zouti.error oError, "MockupsController.save"
                         .then ( oSavedMockup ) =>
                             @countComments oSavedMockup, oSocket
                 , ( err ) ->
@@ -97,7 +106,7 @@ class MockupsController
     update: ( sMockupID, oMockupData ) ->
 
 
-    delete: ( sMockupID ) ->
+    delete: ( sMockupID, socket ) ->
         zouti.log "Deleting mockup #{ sMockupID }", "MockupsController", "RED"
         Mockup
             .destroy( {
@@ -105,6 +114,8 @@ class MockupsController
                     uuid: sMockupID
                 }
             } )
-            .catch( ( oError ) -> zouti.error oError, "MockupsController.delete" )
+            .catch( ( oError ) ->
+                socket.emit "error.new", "There was an error while deleting the mockup."
+                zouti.error oError, "MockupsController.delete" )
 
 module.exports = MockupsController

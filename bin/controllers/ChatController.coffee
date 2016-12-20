@@ -14,7 +14,6 @@ Team = Sequelize.models.Team
 class ChatController
     constructor: ( io ) ->
         @io = io
-        zouti.log "Chat Controller initiating", "ChatController", "GREEN"
 
     getAvatar: ( oData, oSocket ) ->
         u = {

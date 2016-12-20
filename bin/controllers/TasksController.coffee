@@ -9,8 +9,8 @@ Sequelize = require ( "../core/sequelize.coffee" )
 Task = Sequelize.models.Task
 
 class TasksController
-    constructor: () ->
-        zouti.log "Tasks Controller initiating", "TasksController", "GREEN"
+    constructor: ( io ) ->
+        @io = io
 
     getAll: ( sProjectId, callback ) ->
         Task
@@ -24,38 +24,7 @@ class TasksController
             .then ( aTasks ) ->
                 callback( aTasks )
 
-    getRecent: ( callback ) ->
-        zouti.log "Getting recent tasks", "TasksController.getRecent", "GREEN"
-        aTasks = []
-        Task
-            .findAll( {
-                where: { state: "todo" },
-                order: [ [ "createdAt", "DESC" ] ],
-                limit: 2
-            } )
-            .catch ( oError ) -> zouti.error oError, "TasksController.getRecent"
-            .then ( aReturnedTodoTasks ) -> [].push.apply aTasks, aReturnedTodoTasks
-        Task
-            .findAll( {
-                where: { state: "inprogress" },
-                order: [ [ "createdAt", "DESC" ] ],
-                limit: 2
-            } )
-            .catch ( oError ) -> zouti.error oError, "TasksController.getRecent"
-            .then ( aReturnedInProgressTasks ) -> [].push.apply aTasks, aReturnedInProgressTasks
-        Task
-            .findAll( {
-                where: { state: "finished" },
-                order: [ [ "createdAt", "DESC" ] ],
-                limit: 2
-            } )
-            .catch ( oError ) -> zouti.error oError, "TasksController.getRecent"
-            .then ( aReturnedFinishedTasks ) ->
-                [].push.apply aTasks, aReturnedFinishedTasks
-                callback( aTasks )
-
-
-    save: ( oTaskData ) ->
+    save: ( oTaskData, socket ) ->
         zouti.log "Adding task #{ oTaskData.title }", "TasksController", "BLUE"
         Task
             .create
@@ -65,24 +34,61 @@ class TasksController
                 state: oTaskData.state,
                 position: oTaskData.position
                 projectUuid: oTaskData.projectId
-            .catch ( oError ) -> zouti.error oError, "TasksController.save"
-            .then ( oSavedTask ) ->
+                tag: oTaskData.tag
+            .catch ( oError ) ->
+                socket.emit "error.new", "We could not save your task. Please try again later."
+                zouti.error oError, "TasksController.save"
+            .then ( oSavedTask ) =>
                 zouti.log "Saved task", oSavedTask, "GREEN"
                 oSavedTask.addUsers oTaskData.users
+                .catch ( oError ) -> zouti.error oError "TasksController.save"
+                .then () =>
+                    Task
+                        .find
+                            where:
+                                uuid: oSavedTask.uuid
+                            include:
+                                model: Sequelize.models.User
+                        .catch ( oError ) -> zouti.error oError, "TasksController.save"
+                        .then ( oTask ) =>
+                            App.NotificationsController.generate "You were assigned to task \"#{oTaskData.title}\"", oTaskData.projectId, 'notification.task.created', oTaskData.users
+                            socket.broadcast.to(oTaskData.projectId).emit "task.created", oTask
 
-    saveAll: ( aTasks ) ->
+    saveAll: ( aTasks, socket ) ->
         for task in aTasks
-            Task.update( {
-                title: task.title,
-                deadline: task.deadline,
-                state: task.state,
-                position: task.position
-            }, {
-                where: {
-                    uuid: task.uuid
-                }
-            } )
-        zouti.log "Saving tasks", "TasksController.saveAll", "GREEN"
+            @moveTask task, socket
+
+    handleMoveNotification: ( oTask ) ->
+        location = ""
+        if oTask.state == "todo" then location = "To do"
+        if oTask.state == "inprogress" then location = "In progr ess"
+        if oTask.state == "finished" then location = "Completed"
+
+        aUsers = []
+        for user in oTask.users
+            aUsers.push user.id
+
+        App.NotificationsController.generate "Task \"#{oTask.title}\" was moved to \"#{location}\"", oTask.projectUuid, 'notification.task.moved', aUsers
+
+    moveTask: ( oTask, socket ) ->
+        Task.update( {
+            title: oTask.title,
+            deadline: oTask.deadline,
+            state: oTask.state,
+            position: oTask.position
+        }, {
+            where: {
+                uuid: oTask.uuid
+            }
+        } )
+        .catch ( oError ) ->
+            socket.emit "error.new", "There was an error while moving the task."
+            zouti.error oError, "TasksController.saveAll"
+        .then ( affectedRows ) =>
+            @sendUpdatedTask oTask, socket
+
+    sendUpdatedTask: ( oTask, socket ) ->
+        socket.broadcast.to(oTask.projectUuid).emit "task.updated", oTask
 
     update: ( oTask ) ->
         Task
@@ -95,7 +101,9 @@ class TasksController
             where:
                 uuid: oTask.uuid
             )
-            .catch ( oError ) -> zouti.error oError, "TasksController.update"
+            .catch ( oError ) ->
+                socket.emit "error.new", "Error while updating the task."
+                zouti.error oError, "TasksController.update"
             .then () ->
                 zouti.log "Updated task", "GREEN"
                 Task
@@ -107,14 +115,18 @@ class TasksController
                         oResult.setUsers oTask.users
 
 
-    delete: ( sTaskID ) ->
+    delete: ( sTaskID, socket, sProjectId ) ->
         zouti.log "Deleting task #{ sTaskID }", "TasksController", "RED"
         Task
             .destroy
                 where:
                     uuid: sTaskID
 
-            .catch( ( oError ) -> zouti.error oError, "TasksController.delete" )
+            .catch( ( oError ) ->
+                socket.emit "error.new", "There was an error while deleting the task."
+                zouti.error oError, "TasksController.delete" )
+            .then () =>
+                socket.broadcast.to(sProjectId).emit "task.removed", sTaskID
 
 
 module.exports = TasksController

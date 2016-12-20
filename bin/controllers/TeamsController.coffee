@@ -14,7 +14,6 @@ Chatroom = Sequelize.models.Chatroom
 class TeamsController
     constructor: ( io ) ->
         @io = io
-        zouti.log "Teams Controller initiating", "TeamsController", "GREEN"
 
     getUsers: ( sTeamId, oSocket ) ->
         Team

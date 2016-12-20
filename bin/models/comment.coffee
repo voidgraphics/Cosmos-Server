@@ -18,7 +18,7 @@ module.exports = ( oSequelize, DataTypes ) ->
             type: DataTypes.UUID,
             field: "mockup_id"
         text:
-            type: DataTypes.UUID,
+            type: DataTypes.TEXT,
             field: "text"
         x:
             type: DataTypes.FLOAT

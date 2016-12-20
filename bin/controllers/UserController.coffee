@@ -14,7 +14,6 @@ Team = Sequelize.models.Team
 class UserController
     constructor: ( io ) ->
         @io = io
-        zouti.log "User Controller initiating", "UserController", "GREEN"
 
     getAvatar: ( oData, oSocket ) ->
         fs.readFile __dirname + "/../../public/avatars/#{ oData.avatar }", ( err, buffer ) ->
@@ -45,6 +44,7 @@ class UserController
                     password: zouti.sha256 oUserInfo.password
                     avatar: sUserId + '.png'
                 .catch ( oError ) ->
+                    oSocket.emit "error.new", "There was an error while creating your account."
                     oResult =
                         code: 500
                         error: oError.name
@@ -71,8 +71,6 @@ class UserController
             )
 
 
-
-
     login: ( oUserInfo, oSocket ) ->
         oUserInfo.password = zouti.sha256 oUserInfo.password
         User
@@ -89,23 +87,29 @@ class UserController
             .then ( oData ) =>
                 if oData
                     @getAvatar oData, oSocket
+                    App.users[oData.uuid] = oSocket
                 else oSocket.emit "user.notlogged"
 
     join: ( sProjectId, sTeamId, oSocket ) ->
         oSocket.join sProjectId
         oSocket.join sTeamId
 
+    leave: ( sRoomId, oSocket ) ->
+        oSocket.leave sRoomId
+
     addProjects: ( projects, sTeamName, aProjects ) ->
         return projects[ sTeamName ] = aProjects
 
-    getInfo: ( sUserId, callback ) ->
+    getInfo: ( sUserId, socket, callback ) ->
         User
             .find
                 where:
                     uuid: sUserId
                 attributes:
                     exclude: [ "password" ]
-            .catch ( oError ) -> zouti.error oError, "UserController.getInfo"
+            .catch ( oError ) ->
+                socket.emit "error.new", "There was an error while retrieving user data."
+                zouti.error oError, "UserController.getInfo"
             .then ( oData ) -> callback( oData )
 
     getTeams: ( sUserId, oSocket, callback ) ->
@@ -117,12 +121,16 @@ class UserController
             .then ( oUser ) ->
                 oUser
                     .getTeams()
-                    .catch ( oError ) -> zouti.error oError, "UserController.getTeams"
+                    .catch ( oError ) ->
+                        oSocket.emit "error.new", "There was an error while getting the user's teams."
+                        zouti.error oError, "UserController.getTeams"
                     .then ( aTeams ) ->
                         for team in aTeams
                             team
                                 .getRequests()
-                                .catch ( oError ) -> zouti.error oError, "UserController.getTeams"
+                                .catch ( oError ) ->
+                                    oSocket.emit "error.new", "There was an error while getting the team's pending requests."
+                                    zouti.error oError, "UserController.getTeams"
                                 .then ( aRequests ) ->
                                     for request in aRequests
                                         User

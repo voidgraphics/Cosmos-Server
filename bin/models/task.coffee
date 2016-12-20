@@ -23,9 +23,12 @@ module.exports = ( oSequelize, DataTypes ) ->
         position:
             type: DataTypes.INTEGER
             field: "position"
+        tag:
+            type: DataTypes.INTEGER
+            field: "tag"
 
     oProperties =
         tableName: "tasks",
-        paranoid: true
+        paranoid: false
 
     return oSequelize.define "tasks", oColumns, oProperties
