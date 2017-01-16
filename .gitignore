@@ -41,3 +41,4 @@ dist
 *.png
 
 *.jpg
+sendgrid.env

@@ -8,12 +8,13 @@ zouti = require "zouti"
 Sequelize = require ( "../core/sequelize.coffee" )
 Project = Sequelize.models.Project
 Notification = Sequelize.models.Notification
+Notice = Sequelize.models.Notice
 
 class NotificationsController
-    generate: ( sNotificationText, sProjectId, sNotificationType, aUsersToNotify = null ) ->
-        console.log "Project id", sProjectId
-        console.log "Notification type", sNotificationType
-        console.log "Users", aUsersToNotify
+    constructor: ( io ) ->
+        @io = io
+
+    generate: ( sNotificationText, sProjectId, sNotificationType, aUsersToNotify = null, sUserToIgnore = null ) ->
         Project
             .find
                 where:
@@ -22,15 +23,30 @@ class NotificationsController
                     model: Sequelize.models.Team
             .catch ( oError ) -> zouti.error oError, "NotificationsController.generate"
             .then ( oProject ) =>
+                console.log sNotificationType
                 if aUsersToNotify
                     for sUserId in aUsersToNotify
-                        @create sNotificationText, sProjectId, oProject.name, sNotificationType, sUserId
+                        if sUserId != sUserToIgnore
+                            @create sNotificationText, sProjectId, oProject.name, sNotificationType, sUserId
                 else
                     oProject.team.getUsers()
                     .catch ( oError ) -> zouti.error oError, "NotificationsController.generate"
                     .then ( aUsers ) =>
                         for oUser in aUsers
-                            @create sNotificationText, sProjectId, oProject.name, sNotificationType, oUser.uuid
+                            if oUser.uuid != sUserToIgnore
+                                @create sNotificationText, sProjectId, oProject.name, sNotificationType, oUser.uuid
+
+
+    notice: ( sNoticeText, sTeamId, sNoticeType, aUsersToNotify = null, sUserToIgnore = null ) ->
+        Notice
+            .create
+                uuid: zouti.uuid()
+                text: sNoticeText
+                teamUuid: sTeamId
+            .catch ( oError ) -> zouti.error oError, 'NotificationsController.notice'
+            .then ( oNotice ) =>
+                console.log 'emitting ' + sNoticeType + ' to team ' + sTeamId
+                @io.of( sTeamId ).emit sNoticeType, oNotice
 
     create: ( sNotificationText, sProjectId, sProjectName, sNotificationType, sUserId ) ->
         Notification
@@ -41,22 +57,23 @@ class NotificationsController
                 text: sNotificationText
             .catch ( oError ) -> zouti.error oError, "NotificationsController.generate"
             .then ( oSavedNotification ) =>
-                if sUserId of App.users
-                    o =
-                        id: oSavedNotification.uuid
-                        text: oSavedNotification.text
-                        project:
-                            id: sProjectId
-                            name: sProjectName
-                        date: oSavedNotification.createdAt
-                    App.users[sUserId].emit sNotificationType, o
+                # if sUserId of @io.users
+                o =
+                    id: oSavedNotification.uuid
+                    text: oSavedNotification.text
+                    project:
+                        id: sProjectId
+                        name: sProjectName
+                    date: oSavedNotification.createdAt
+                console.log 'pushing notification to socket ' + sUserId
+                @io.to( sUserId ).emit sNotificationType, o
 
     fetch: ( sUserId, callback ) ->
         Notification
             .findAll
                 where:
                     userUuid: sUserId
-                limit: 5
+                    read: false
                 order: 'createdAt DESC'
 
                 include:

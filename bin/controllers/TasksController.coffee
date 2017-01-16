@@ -12,15 +12,17 @@ class TasksController
     constructor: ( io ) ->
         @io = io
 
-    getAll: ( sProjectId, callback ) ->
+    getAll: ( sProjectId, socket, callback ) ->
         Task
             .findAll
                 where:
                     projectUuid: sProjectId
                 include:
                     model: Sequelize.models.User
-                    attributes: [ 'id' ]
-            .catch ( oError ) -> zouti.error oError, "TasksController.getAll"
+                    attributes: [ 'id', 'username', 'firstname', 'lastname' ]
+            .catch ( oError ) ->
+                socket.emit "error.new", "There was an error while fetching the tasks."
+                zouti.error oError, "TasksController.getAll"
             .then ( aTasks ) ->
                 callback( aTasks )
 
@@ -41,7 +43,9 @@ class TasksController
             .then ( oSavedTask ) =>
                 zouti.log "Saved task", oSavedTask, "GREEN"
                 oSavedTask.addUsers oTaskData.users
-                .catch ( oError ) -> zouti.error oError "TasksController.save"
+                .catch ( oError ) ->
+                    zouti.error oError "TasksController.save"
+                    socket.emit "error.new", "There was an error while assigning users to the task."
                 .then () =>
                     Task
                         .find
@@ -51,29 +55,32 @@ class TasksController
                                 model: Sequelize.models.User
                         .catch ( oError ) -> zouti.error oError, "TasksController.save"
                         .then ( oTask ) =>
-                            App.NotificationsController.generate "You were assigned to task \"#{oTaskData.title}\"", oTaskData.projectId, 'notification.task.created', oTaskData.users
+                            socket.emit 'task.created', oTask
                             socket.broadcast.to(oTaskData.projectId).emit "task.created", oTask
+                            socket.notifications.generate "You were assigned to task \"#{oTaskData.title}\"", oTaskData.projectId, 'notification.task.created', oTaskData.users, socket.cosmosUserId
 
     saveAll: ( aTasks, socket ) ->
         for task in aTasks
-            @moveTask task, socket
+            @editTask task, socket
 
-    handleMoveNotification: ( oTask ) ->
+    handleMoveNotification: ( oTask, oSocket ) ->
         location = ""
         if oTask.state == "todo" then location = "To do"
-        if oTask.state == "inprogress" then location = "In progr ess"
+        if oTask.state == "inprogress" then location = "In progress"
         if oTask.state == "finished" then location = "Completed"
 
         aUsers = []
         for user in oTask.users
-            aUsers.push user.id
+            id = if typeof user == 'string' then id = user else ( user.id || user.uuid )
+            aUsers.push id
 
-        App.NotificationsController.generate "Task \"#{oTask.title}\" was moved to \"#{location}\"", oTask.projectUuid, 'notification.task.moved', aUsers
+        oSocket.notifications.generate "Task \"#{oTask.title}\" was moved to \"#{location}\"", ( oTask.projectUuid || oTask.projectId ), 'notification.task.moved', aUsers, oSocket.cosmosUserId
 
-    moveTask: ( oTask, socket ) ->
+    editTask: ( oTask, socket ) ->
         Task.update( {
             title: oTask.title,
             deadline: oTask.deadline,
+            tag: oTask.tag,
             state: oTask.state,
             position: oTask.position
         }, {
@@ -82,20 +89,21 @@ class TasksController
             }
         } )
         .catch ( oError ) ->
-            socket.emit "error.new", "There was an error while moving the task."
+            socket.emit "error.new", "There was an error while updating the task."
             zouti.error oError, "TasksController.saveAll"
         .then ( affectedRows ) =>
             @sendUpdatedTask oTask, socket
 
     sendUpdatedTask: ( oTask, socket ) ->
-        socket.broadcast.to(oTask.projectUuid).emit "task.updated", oTask
+        socket.broadcast.to(oTask.projectId || oTask.projectUuid).emit "task.updated", oTask
 
-    update: ( oTask ) ->
+    update: ( oTask, socket ) ->
         Task
             .update( {
                 title: oTask.title
                 deadline: oTask.deadline
                 state: oTask.state
+                tag: oTask.tag
                 position: oTask.position
             },
             where:
@@ -103,16 +111,31 @@ class TasksController
             )
             .catch ( oError ) ->
                 socket.emit "error.new", "Error while updating the task."
-                zouti.error oError, "TasksController.update"
+                zouti.error oError, "TasksController.update:update"
             .then () ->
                 zouti.log "Updated task", "GREEN"
                 Task
                     .find
                         where:
                             uuid: oTask.uuid
-                    .catch ( oError ) -> zouti.error oError, "TasksController.update"
+                    .catch ( oError ) -> zouti.error oError, "TasksController.update:find"
                     .then ( oResult ) ->
                         oResult.setUsers oTask.users
+                        .catch ( oError ) -> zouti.error oError, 'TasksController.update:setUsers'
+                        .then ( ) ->
+                            Task
+                                .find
+                                    where:
+                                        uuid: oTask.uuid
+                                    include: Sequelize.models.User
+                                .catch ( oError ) -> zouti.error oError, 'TasksController.update:find2'
+                                .then ( oTask ) ->
+                                    aUsers = []
+                                    for user in oTask.users
+                                        id = if typeof user == 'string' then id = user else ( user.id || user.uuid )
+                                        aUsers.push id
+                                    socket.notifications.generate "Update to task: #{oTask.title}", ( oTask.projectUuid || oTask.projectId ), 'notification.task.edited', aUsers, socket.cosmosUserId
+                                    socket.broadcast.to(oTask.projectId || oTask.projectUuid).emit "task.updated", oTask
 
 
     delete: ( sTaskID, socket, sProjectId ) ->

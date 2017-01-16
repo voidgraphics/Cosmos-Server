@@ -11,12 +11,13 @@ server = require( "http" ).Server( express )
 io = require( "socket.io" )( server )
 zouti = require "zouti"
 
+io.users = []
+
 # Init socket.io
 io.on "connection", ( oSocket ) =>
     zouti.log "A user connected", "bin/core/express.coffee", "GREEN"
 
-    global.App = new ( require "../core/App.coffee" )( io )
-    App.init( oSocket )
+    App = new ( require "../core/App.coffee" )( io, oSocket )
 
 # Listen
 server.listen 12345

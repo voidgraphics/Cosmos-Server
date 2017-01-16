@@ -14,9 +14,6 @@ module.exports = ( oSequelize, DataTypes ) ->
         authorId:
             type: DataTypes.UUID,
             field: "author_id"
-        mockupId:
-            type: DataTypes.UUID,
-            field: "mockup_id"
         text:
             type: DataTypes.TEXT,
             field: "text"

@@ -26,13 +26,14 @@ Project =       oSequelize.import "../models/project.coffee"
 Chatroom =      oSequelize.import "../models/chatroom.coffee"
 Request =       oSequelize.import "../models/request.coffee"
 Notification =  oSequelize.import "../models/notification.coffee"
+Notice =        oSequelize.import "../models/notice.coffee"
 
 # Relations
 Chat.belongsTo( User, { foreignKey: 'user_id' } )
 User.hasMany( Chat, { foreignKey: 'user_id' } )
 Comment.belongsTo( User, { foreignKey: 'author_id' } )
 Comment.belongsTo( Mockup, { foreignKey: 'mockup_id' } )
-Mockup.hasMany( Comment )
+Mockup.hasMany( Comment, { foreignKey: 'mockup_id' } )
 User.belongsToMany( Team, { through: "users_teams" } )
 Team.belongsToMany( User, { through: "users_teams" } )
 Task.belongsToMany( User, { through: "users_tasks" } )
@@ -46,9 +47,12 @@ Project.hasMany( Task )
 Project.hasMany( Mockup )
 Team.hasMany( Request )
 User.hasMany( Request )
+Request.belongsTo( User, { foreignKey: 'user_id' } )
+Request.belongsTo( Team, { foreignKey: 'team_id' } )
 User.hasMany( Notification )
 Notification.belongsTo( User, { foreignKey: 'userUuid' } )
 Notification.belongsTo( Project, { foreignKey: 'projectUuid' } )
+Notice.belongsTo( Team, { foreignKey: 'teamUuid' } )
 
 # Models
 oSequelize.models = oModels =
@@ -62,6 +66,7 @@ oSequelize.models = oModels =
     Chatroom:   Chatroom
     Request:    Request
     Notification: Notification
+    Notice:     Notice
 
 oSequelize
     .sync({ force: false })

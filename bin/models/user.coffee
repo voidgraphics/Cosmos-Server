@@ -4,6 +4,8 @@
     Started May 10, 2016
 ###
 
+fs = require 'fs'
+
 module.exports = ( oSequelize, DataTypes ) ->
     oColumns =
         uuid:
@@ -23,6 +25,9 @@ module.exports = ( oSequelize, DataTypes ) ->
         lastname:
             type: DataTypes.STRING
             field: "lastname"
+        email:
+            type: DataTypes.STRING
+            field: "email"
         password:
             type: DataTypes.STRING
             allowNull: false
@@ -31,8 +36,12 @@ module.exports = ( oSequelize, DataTypes ) ->
             type: DataTypes.STRING
             field: "avatar"
         settings:
-            type: DataTypes.TEXT
+            type: DataTypes.STRING 12345
             field: "settings"
+            defaultValue: '{"notifications":{"tasksAssigned":true,"tasksMoved":true,"tasksEdited":true,"newComment":true,"newRequest":true,"newMessage":true,"newTargetedMessage":true,"newChatroom":true,"newMockup":true},"usability":{"theme":"light","hasSchedule":false,"isColorblind":true}}'
+        pwRequestId:
+            type: DataTypes.UUID
+            field: 'pwRequestId'
 
     oProperties =
         tableName: "users"
