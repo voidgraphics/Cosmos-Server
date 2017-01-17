@@ -25,15 +25,16 @@ class TeamsController
             .catch ( oError ) => zouti.error oError, "TeamsController.getUsers"
             .then ( oTeam ) =>
                 for user in oTeam.users
-                    @fetchAvatar user, oSocket
+                    @fetchAvatar user, oSocket, ( oUser ) =>
+                        oSocket.emit "team.receiveUser", oUser
 
-    fetchAvatar: ( oUser, oSocket ) ->
+    fetchAvatar: ( oUser, oSocket, callback ) ->
         fs.readFile __dirname + "/../../public/avatars/#{ oUser.avatar }", ( err, buffer ) ->
             if err
                 oSocket.emit "user.error", "Could not get avatar for #{oUser.username}"
                 return zouti.error err, "TeamsController.fetchAvatar"
             oUser.avatar = buffer.toString "base64"
-            oSocket.emit "team.receiveUser", oUser
+            callback oUser
 
     create: ( sTeamName, sUserId, oSocket ) ->
         Team
@@ -177,6 +178,9 @@ class TeamsController
                                 attributes: [ 'username' ]
                             .catch ( oError ) -> zouti.error oError, 'TeamsController.accept'
                             .then ( oUser ) =>
+                                @fetchAvatar oUser, socket, ( oUser ) =>
+                                    console.log 'fetched avatar for new joiner'
+                                    @io.to( sTeamId ).emit 'team.receiveUser', oUser
                                 @io.to( sTeamId ).emit 'notification.flash', oTeam.name, oUser.username + ' has just joined your team!'
                         Request
                             .destroy

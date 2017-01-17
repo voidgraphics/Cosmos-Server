@@ -19,7 +19,7 @@ class TasksController
                     projectUuid: sProjectId
                 include:
                     model: Sequelize.models.User
-                    attributes: [ 'id', 'username', 'firstname', 'lastname' ]
+                    attributes: [ 'uuid', 'username', 'firstname', 'lastname' ]
             .catch ( oError ) ->
                 socket.emit "error.new", "There was an error while fetching the tasks."
                 zouti.error oError, "TasksController.getAll"
